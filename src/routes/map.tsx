@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { signals, severityColor, severityLabel, type Signal } from "@/data/signals";
+import { severityColor, severityLabel, type Signal } from "@/data/signals";
+import { useAllSignals } from "@/hooks/useSignals";
 import { SeverityBadge } from "@/components/SeverityBadge";
 
 export const Route = createFileRoute("/map")({
@@ -22,7 +23,9 @@ function project(coords: [number, number]): { left: string; top: string } {
 }
 
 function MapPage() {
-  const [selected, setSelected] = useState<Signal>(signals[0]);
+  const signals = useAllSignals();
+  const [selectedId, setSelectedId] = useState<string>(signals[0].id);
+  const selected: Signal = signals.find((s) => s.id === selectedId) ?? signals[0];
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-background">
@@ -55,7 +58,7 @@ function MapPage() {
               return (
                 <button
                   key={sig.id}
-                  onClick={() => setSelected(sig)}
+                  onClick={() => setSelectedId(sig.id)}
                   className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
                   style={{ left, top }}
                   aria-label={`${sig.location} — ${sig.severity}`}
