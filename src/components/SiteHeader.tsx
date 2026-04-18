@@ -5,6 +5,7 @@ const links = [
   { to: "/map", label: "Live Map" },
   { to: "/dashboard", label: "Interventions" },
   { to: "/impact", label: "Impact Feed" },
+  { to: "/report", label: "Submit Report" },
 ] as const;
 
 export function SiteHeader() {

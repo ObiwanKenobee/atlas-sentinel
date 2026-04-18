@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { signals, interventions, severityColor } from "@/data/signals";
+import { severityColor } from "@/data/signals";
+import { useAllSignals, useAllInterventions } from "@/hooks/useSignals";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { z } from "zod";
 
@@ -19,11 +20,13 @@ export const Route = createFileRoute("/dashboard")({
 
 function Dashboard() {
   const { id } = Route.useSearch();
+  const signals = useAllSignals();
+  const interventions = useAllInterventions();
   const initial = signals.find((s) => s.id === id) ?? signals[0];
   const [selectedId, setSelectedId] = useState(initial.id);
   const [funded, setFunded] = useState<Record<string, boolean>>({});
 
-  const selected = signals.find((s) => s.id === selectedId)!;
+  const selected = signals.find((s) => s.id === selectedId) ?? signals[0];
   const intervention = interventions[selected.id];
 
   // Sort by severity score desc
