@@ -59,29 +59,57 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-severity-low: var(--severity-low);
+  --color-severity-medium: var(--severity-medium);
+  --color-severity-high: var(--severity-high);
+  --color-severity-critical: var(--severity-critical);
+  --color-clay: var(--clay);
+  --color-clay-deep: var(--clay-deep);
+  --color-sand: var(--sand);
+  --color-olive: var(--olive);
+  --font-serif: "Fraunces", "Georgia", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.75rem;
+  /* Humanitarian warm: ivory base, terracotta primary, deep clay foreground */
+  --background: oklch(0.985 0.012 80);
+  --foreground: oklch(0.235 0.035 45);
+  --card: oklch(0.995 0.008 85);
+  --card-foreground: oklch(0.235 0.035 45);
+  --popover: oklch(0.995 0.008 85);
+  --popover-foreground: oklch(0.235 0.035 45);
+  --primary: oklch(0.58 0.165 38);
+  --primary-foreground: oklch(0.985 0.012 80);
+  --secondary: oklch(0.93 0.025 75);
+  --secondary-foreground: oklch(0.3 0.04 45);
+  --muted: oklch(0.94 0.018 80);
+  --muted-foreground: oklch(0.48 0.03 50);
+  --accent: oklch(0.72 0.13 65);
+  --accent-foreground: oklch(0.22 0.04 45);
+  --destructive: oklch(0.55 0.21 28);
+  --destructive-foreground: oklch(0.985 0.012 80);
+  --border: oklch(0.88 0.02 70);
+  --input: oklch(0.9 0.018 70);
+  --ring: oklch(0.58 0.165 38);
+
+  /* Severity scale (low → critical) */
+  --severity-low: oklch(0.72 0.14 145);
+  --severity-medium: oklch(0.78 0.16 85);
+  --severity-high: oklch(0.7 0.18 50);
+  --severity-critical: oklch(0.58 0.22 28);
+
+  /* Brand atmospherics */
+  --clay: oklch(0.58 0.165 38);
+  --clay-deep: oklch(0.42 0.13 35);
+  --sand: oklch(0.92 0.04 80);
+  --olive: oklch(0.55 0.08 120);
+  --gradient-warm: linear-gradient(135deg, oklch(0.58 0.165 38) 0%, oklch(0.7 0.16 60) 100%);
+  --gradient-dawn: linear-gradient(180deg, oklch(0.985 0.012 80) 0%, oklch(0.93 0.04 70) 100%);
+  --gradient-hero: linear-gradient(180deg, oklch(0.235 0.035 45 / 0.15) 0%, oklch(0.235 0.035 45 / 0.75) 100%);
+  --shadow-warm: 0 10px 40px -12px oklch(0.42 0.13 35 / 0.25);
+  --shadow-soft: 0 2px 12px -4px oklch(0.42 0.13 35 / 0.12);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -140,5 +168,36 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+}
+
+@layer utilities {
+  .font-serif { font-family: var(--font-serif); }
+  .bg-gradient-warm { background: var(--gradient-warm); }
+  .bg-gradient-dawn { background: var(--gradient-dawn); }
+  .bg-gradient-hero { background: var(--gradient-hero); }
+  .shadow-warm { box-shadow: var(--shadow-warm); }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .pulse-dot {
+    animation: pulse-ring 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  @keyframes pulse-ring {
+    0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+    50% { box-shadow: 0 0 0 12px transparent; opacity: 0.85; }
+  }
+  .fade-up {
+    animation: fade-up 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 }
