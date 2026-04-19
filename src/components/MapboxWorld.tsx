@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { severityColor, type Signal } from "@/data/signals";
+import { severityColor, type Severity } from "@/data/signals";
 import type { LiveSignal } from "@/hooks/useSignals";
 
 const TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN as string | undefined;
@@ -207,7 +207,7 @@ export function MapboxWorld({ signals, selectedId, onSelect }: Props) {
             location: s.location,
             severity: s.severity,
             status: s.status,
-            color: severityColor[s.severity],
+            color: severityColor[s.severity as Severity],
           },
         })),
       };
