@@ -7,7 +7,9 @@ import {
   type Intervention,
 } from "@/data/signals";
 
-type DbSignalRow = {
+export type SignalStatus = "pending" | "approved" | "funded" | "rejected";
+
+export type DbSignalRow = {
   id: string;
   location: string;
   lat: number;
@@ -23,9 +25,20 @@ type DbSignalRow = {
   execution_days: number;
   impact_score: number;
   created_at: string;
+  status: string;
+  tx_hash: string | null;
+  approved_at: string | null;
+  funded_at: string | null;
 };
 
-function rowToSignal(r: DbSignalRow): Signal {
+export interface LiveSignal extends Signal {
+  status: SignalStatus;
+  txHash: string | null;
+  approvedAt: string | null;
+  fundedAt: string | null;
+}
+
+function rowToSignal(r: DbSignalRow): LiveSignal {
   return {
     id: r.id,
     location: r.location,
@@ -38,6 +51,10 @@ function rowToSignal(r: DbSignalRow): Signal {
     reportedAt: relativeTime(r.created_at),
     source: "community",
     summary: r.summary,
+    status: (r.status as SignalStatus) ?? "pending",
+    txHash: r.tx_hash,
+    approvedAt: r.approved_at,
+    fundedAt: r.funded_at,
   };
 }
 
@@ -81,9 +98,24 @@ function useDbSignals() {
       .channel("signals-feed")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "signals" },
+        { event: "*", schema: "public", table: "signals" },
         (payload) => {
-          setRows((prev) => [payload.new as DbSignalRow, ...prev]);
+          setRows((prev) => {
+            if (payload.eventType === "INSERT") {
+              return [payload.new as DbSignalRow, ...prev];
+            }
+            if (payload.eventType === "UPDATE") {
+              return prev.map((r) =>
+                r.id === (payload.new as DbSignalRow).id
+                  ? (payload.new as DbSignalRow)
+                  : r,
+              );
+            }
+            if (payload.eventType === "DELETE") {
+              return prev.filter((r) => r.id !== (payload.old as DbSignalRow).id);
+            }
+            return prev;
+          });
         },
       )
       .subscribe();
@@ -97,10 +129,14 @@ function useDbSignals() {
   return rows;
 }
 
-export function useAllSignals() {
+function withSeedDefaults(s: Signal): LiveSignal {
+  return { ...s, status: "pending", txHash: null, approvedAt: null, fundedAt: null };
+}
+
+export function useAllSignals(): LiveSignal[] {
   const rows = useDbSignals();
   const live = rows.map(rowToSignal);
-  return [...live, ...seedSignals];
+  return [...live, ...seedSignals.map(withSeedDefaults)];
 }
 
 export function useAllInterventions() {
@@ -108,4 +144,10 @@ export function useAllInterventions() {
   const live: Record<string, Intervention> = {};
   for (const r of rows) live[r.id] = rowToIntervention(r);
   return { ...seedInterventions, ...live };
+}
+
+/** DB-only signals (no seed data) — used by the impact feed which only shows funded items. */
+export function useDbOnlySignals(): LiveSignal[] {
+  const rows = useDbSignals();
+  return rows.map(rowToSignal);
 }

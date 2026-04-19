@@ -1,4 +1,5 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useAuth, signOut } from "@/hooks/useAuth";
 
 const links = [
   { to: "/", label: "Home" },
@@ -9,6 +10,9 @@ const links = [
 ] as const;
 
 export function SiteHeader() {
+  const { user, isNgoMember } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -26,20 +30,41 @@ export function SiteHeader() {
             <Link
               key={l.to}
               to={l.to}
-              activeOptions={{ exact: l.to === "/" }}
-              className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/60"
-              activeProps={{ className: "rounded-md px-3 py-1.5 text-sm bg-muted text-foreground font-medium" }}
+              className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeProps={{ className: "rounded-full px-3 py-1.5 text-sm bg-muted text-foreground" }}
             >
               {l.label}
             </Link>
           ))}
+          {user ? (
+            <div className="ml-3 flex items-center gap-2 border-l border-border pl-3">
+              <span className="text-xs text-muted-foreground">
+                {isNgoMember && (
+                  <span className="mr-1.5 rounded-full bg-olive/15 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-olive">
+                    NGO
+                  </span>
+                )}
+                {user.email}
+              </span>
+              <button
+                onClick={async () => {
+                  await signOut();
+                  navigate({ to: "/" });
+                }}
+                className="rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="ml-3 rounded-full bg-foreground px-3.5 py-1.5 text-xs font-medium text-background hover:opacity-90"
+            >
+              NGO sign in
+            </Link>
+          )}
         </nav>
-        <Link
-          to="/map"
-          className="hidden md:inline-flex items-center rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90"
-        >
-          Open dashboard →
-        </Link>
       </div>
     </header>
   );
