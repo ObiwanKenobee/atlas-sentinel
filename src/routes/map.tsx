@@ -3,6 +3,7 @@ import { useState } from "react";
 import { severityColor, severityLabel, type Signal } from "@/data/signals";
 import { useAllSignals } from "@/hooks/useSignals";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { MapboxWorld } from "@/components/MapboxWorld";
 
 export const Route = createFileRoute("/map")({
   head: () => ({
