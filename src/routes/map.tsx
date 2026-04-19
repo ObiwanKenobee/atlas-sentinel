@@ -46,34 +46,9 @@ function MapPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
           {/* Map */}
           <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-border bg-sand shadow-soft">
-            <WorldGrid />
-            {signals.map((sig) => {
-              const { left, top } = project(sig.coords);
-              const isActive = selected.id === sig.id;
-              return (
-                <button
-                  key={sig.id}
-                  onClick={() => setSelectedId(sig.id)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
-                  style={{ left, top }}
-                  aria-label={`${sig.location} — ${sig.severity}`}
-                >
-                  <span
-                    className="pulse-dot block rounded-full transition-transform hover:scale-125"
-                    style={{
-                      width: isActive ? 18 : 12,
-                      height: isActive ? 18 : 12,
-                      backgroundColor: severityColor[sig.severity],
-                      color: severityColor[sig.severity],
-                      outline: isActive ? "2px solid var(--background)" : "none",
-                      outlineOffset: 2,
-                    }}
-                  />
-                </button>
-              );
-            })}
-            <div className="absolute bottom-4 left-4 rounded-full bg-background/80 px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground backdrop-blur">
-              Atlas projection · {signals.length} active signals
+            <MapboxWorld signals={signals} selectedId={selected.id} onSelect={setSelectedId} />
+            <div className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-background/80 px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground backdrop-blur">
+              Mapbox · {signals.length} active signals
             </div>
           </div>
 
