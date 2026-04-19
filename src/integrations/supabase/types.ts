@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      signals: {
+        Row: {
+          created_at: string
+          description: string
+          estimated_affected: number
+          estimated_cost: number
+          execution_days: number
+          id: string
+          impact_score: number
+          lat: number
+          lng: number
+          location: string
+          matched_actor: string
+          recommended_action: string
+          severity: string
+          severity_score: number
+          status: string
+          summary: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          estimated_affected?: number
+          estimated_cost?: number
+          execution_days?: number
+          id?: string
+          impact_score?: number
+          lat: number
+          lng: number
+          location: string
+          matched_actor: string
+          recommended_action: string
+          severity: string
+          severity_score: number
+          status?: string
+          summary: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          estimated_affected?: number
+          estimated_cost?: number
+          execution_days?: number
+          id?: string
+          impact_score?: number
+          lat?: number
+          lng?: number
+          location?: string
+          matched_actor?: string
+          recommended_action?: string
+          severity?: string
+          severity_score?: number
+          status?: string
+          summary?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
