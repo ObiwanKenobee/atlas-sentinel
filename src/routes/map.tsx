@@ -3,6 +3,7 @@ import { useState } from "react";
 import { severityColor, severityLabel, type Signal } from "@/data/signals";
 import { useAllSignals } from "@/hooks/useSignals";
 import { SeverityBadge } from "@/components/SeverityBadge";
+import { MapboxWorld } from "@/components/MapboxWorld";
 
 export const Route = createFileRoute("/map")({
   head: () => ({
@@ -14,13 +15,7 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-// Project lng/lat onto a flat rectangle (-180..180, -60..75)
-function project(coords: [number, number]): { left: string; top: string } {
-  const [lng, lat] = coords;
-  const x = ((lng + 180) / 360) * 100;
-  const y = ((75 - lat) / 135) * 100;
-  return { left: `${x}%`, top: `${y}%` };
-}
+// Mapbox basemap renders pins from signal coords directly.
 
 function MapPage() {
   const signals = useAllSignals();
@@ -51,34 +46,9 @@ function MapPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
           {/* Map */}
           <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-border bg-sand shadow-soft">
-            <WorldGrid />
-            {signals.map((sig) => {
-              const { left, top } = project(sig.coords);
-              const isActive = selected.id === sig.id;
-              return (
-                <button
-                  key={sig.id}
-                  onClick={() => setSelectedId(sig.id)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 focus:outline-none"
-                  style={{ left, top }}
-                  aria-label={`${sig.location} — ${sig.severity}`}
-                >
-                  <span
-                    className="pulse-dot block rounded-full transition-transform hover:scale-125"
-                    style={{
-                      width: isActive ? 18 : 12,
-                      height: isActive ? 18 : 12,
-                      backgroundColor: severityColor[sig.severity],
-                      color: severityColor[sig.severity],
-                      outline: isActive ? "2px solid var(--background)" : "none",
-                      outlineOffset: 2,
-                    }}
-                  />
-                </button>
-              );
-            })}
-            <div className="absolute bottom-4 left-4 rounded-full bg-background/80 px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground backdrop-blur">
-              Atlas projection · {signals.length} active signals
+            <MapboxWorld signals={signals} selectedId={selected.id} onSelect={setSelectedId} />
+            <div className="pointer-events-none absolute bottom-4 left-4 rounded-full bg-background/80 px-3 py-1 text-[10px] uppercase tracking-widest text-muted-foreground backdrop-blur">
+              Mapbox · {signals.length} active signals
             </div>
           </div>
 
@@ -140,36 +110,5 @@ function MapPage() {
         </div>
       </div>
     </main>
-  );
-}
-
-function WorldGrid() {
-  // Subtle decorative grid + continental smear so the map reads as a map without a real basemap dependency
-  return (
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1600 900" preserveAspectRatio="none">
-      <defs>
-        <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-          <path d="M 80 0 L 0 0 0 80" fill="none" stroke="oklch(0.85 0.03 70)" strokeWidth="0.5" />
-        </pattern>
-        <radialGradient id="land" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="oklch(0.86 0.05 75)" />
-          <stop offset="100%" stopColor="oklch(0.92 0.04 80)" />
-        </radialGradient>
-      </defs>
-      <rect width="1600" height="900" fill="url(#grid)" opacity="0.6" />
-      {/* Continental blobs (very abstract) */}
-      <g fill="url(#land)" opacity="0.85">
-        <ellipse cx="450" cy="380" rx="220" ry="160" />
-        <ellipse cx="820" cy="430" rx="170" ry="220" />
-        <ellipse cx="1080" cy="380" rx="240" ry="180" />
-        <ellipse cx="1280" cy="540" rx="150" ry="120" />
-        <ellipse cx="380" cy="650" rx="120" ry="180" />
-        <ellipse cx="900" cy="700" rx="80" ry="60" />
-      </g>
-      <g stroke="oklch(0.7 0.05 65)" strokeWidth="0.5" opacity="0.4" fill="none">
-        <line x1="0" y1="450" x2="1600" y2="450" />
-        <line x1="800" y1="0" x2="800" y2="900" />
-      </g>
-    </svg>
   );
 }
