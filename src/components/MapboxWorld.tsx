@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import { severityColor } from "@/data/signals";
+import { severityColor, type Signal } from "@/data/signals";
 import type { LiveSignal } from "@/hooks/useSignals";
 
 const TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN as string | undefined;
