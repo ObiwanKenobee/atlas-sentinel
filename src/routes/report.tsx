@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { classifyReport } from "@/utils/classify.functions";
-import { liveSignalStore } from "@/data/liveSignalStore";
+import { supabase } from "@/integrations/supabase/client";
 import { SeverityBadge } from "@/components/SeverityBadge";
 import { severityColor, type Signal, type Intervention } from "@/data/signals";
 
@@ -65,12 +65,37 @@ function ReportPage() {
         return;
       }
       const r = res.result;
-      const id = `usr-${Date.now().toString(36)}`;
+      const [lng, lat] = geocode(location);
+      const { data: inserted, error: insertErr } = await supabase
+        .from("signals")
+        .insert({
+          location,
+          lat,
+          lng,
+          type: r.type,
+          severity: r.severity,
+          severity_score: r.severityScore,
+          estimated_affected: r.estimatedAffected,
+          summary: r.summary,
+          recommended_action: r.recommendedAction,
+          matched_actor: r.matchedActor,
+          estimated_cost: r.estimatedCost,
+          execution_days: r.executionDays,
+          impact_score: r.impactScore,
+          description,
+        })
+        .select()
+        .single();
+      if (insertErr || !inserted) {
+        console.error(insertErr);
+        setError("Could not save your report. Please try again.");
+        return;
+      }
       const signal: Signal = {
-        id,
+        id: inserted.id,
         location,
         region: location.split(",").pop()?.trim() || location,
-        coords: geocode(location),
+        coords: [lng, lat],
         type: r.type,
         severity: r.severity,
         severityScore: r.severityScore,
@@ -80,7 +105,7 @@ function ReportPage() {
         summary: r.summary,
       };
       const intervention: Intervention = {
-        signalId: id,
+        signalId: inserted.id,
         recommendedAction: r.recommendedAction,
         estimatedCost: r.estimatedCost,
         impactScore: r.impactScore,
@@ -88,7 +113,6 @@ function ReportPage() {
         fundingSource: "Community Pool · Pending review",
         executionDays: r.executionDays,
       };
-      liveSignalStore.add(signal, intervention);
       setResult({ signal, intervention });
     } catch (err) {
       console.error(err);
