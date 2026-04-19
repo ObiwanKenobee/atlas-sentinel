@@ -15,13 +15,7 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
-// Project lng/lat onto a flat rectangle (-180..180, -60..75)
-function project(coords: [number, number]): { left: string; top: string } {
-  const [lng, lat] = coords;
-  const x = ((lng + 180) / 360) * 100;
-  const y = ((75 - lat) / 135) * 100;
-  return { left: `${x}%`, top: `${y}%` };
-}
+// Mapbox basemap renders pins from signal coords directly.
 
 function MapPage() {
   const signals = useAllSignals();
